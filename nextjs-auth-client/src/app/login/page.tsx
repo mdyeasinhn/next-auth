@@ -3,6 +3,7 @@ import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 type FormValues = {
   email: string;
@@ -10,14 +11,32 @@ type FormValues = {
 };
 
 const LoginPage = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormValues>();
+  } = useForm<FormValues>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const onSubmit = async (data: FormValues) => {
-    console.log(data);
+    const result = await signIn("credentials", {
+      redirect: false,
+      email: data.email,
+      password: data.password,
+      callbackUrl: "/dashboard",
+    });
+
+    if (result?.error) {
+      console.error(result.error);
+      // You can add toast notification here
+    } else {
+      router.push(result?.url || "/dashboard");
+    }
   };
 
   return (
@@ -33,6 +52,7 @@ const LoginPage = () => {
             height={200}
             alt="login page"
             className="w-full h-auto"
+            priority
           />
         </div>
 
@@ -48,11 +68,21 @@ const LoginPage = () => {
               <input
                 id="email"
                 type="email"
-                {...register("email")}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address",
+                  },
+                })}
                 placeholder="Email"
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm  sm:text-sm"
-                required
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
             <div className="mb-6">
@@ -65,17 +95,27 @@ const LoginPage = () => {
               <input
                 id="password"
                 type="password"
-                {...register("password")}
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters",
+                  },
+                })}
                 placeholder="Password"
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm  sm:text-sm"
-                required
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
               />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             <div>
               <button
                 type="submit"
-                className="w-full border border-teal-500 text-teal-500 font-semibold py-2 px-4 rounded-md shadow-md hover:bg-teal-500 hover:text-black"
+                className="w-full border border-teal-500 text-teal-500 font-semibold py-2 px-4 rounded-md shadow-md hover:bg-teal-500 hover:text-white transition-colors duration-300"
               >
                 Login
               </button>
@@ -84,18 +124,33 @@ const LoginPage = () => {
 
           <p className="text-center mt-4 text-sm text-gray-600">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-teal-500 hover:underline">
+            <Link
+              href="/register"
+              className="text-teal-500 hover:underline font-medium"
+            >
               Create an account
             </Link>
           </p>
 
-          <p className="text-center mt-6 text-sm text-gray-500">
-            Or Sign Up Using
-          </p>
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">
+                Or continue with
+              </span>
+            </div>
+          </div>
 
-          {/* Social Login Buttons */}
           <div className="flex justify-center gap-4 mt-4">
-            <button className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full shadow-md hover:bg-gray-200">
+            <button
+              onClick={() =>
+                signIn("google", { callbackUrl: "/dashboard" })
+              }
+              className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full shadow-md hover:bg-gray-200 transition-colors duration-300"
+              aria-label="Sign in with Google"
+            >
               <Image
                 src="https://www.freepnglogos.com/uploads/google-logo-png/google-logo-png-webinar-optimizing-for-success-google-business-webinar-13.png"
                 width={30}
@@ -103,7 +158,13 @@ const LoginPage = () => {
                 alt="Google logo"
               />
             </button>
-            <button onClick={()=>signIn()} className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full shadow-md hover:bg-gray-200">
+            <button
+              onClick={() =>
+                signIn("github", { callbackUrl: "/dashboard" })
+              }
+              className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full shadow-md hover:bg-gray-200 transition-colors duration-300"
+              aria-label="Sign in with GitHub"
+            >
               <Image
                 src="https://cdn-icons-png.flaticon.com/512/25/25231.png"
                 width={25}
