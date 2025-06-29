@@ -1,13 +1,13 @@
 import Link from "next/link";
 type UserProps = {
   user?: {
-    name?: string;
-    email?: string;
-    image?: string;
+    name?: string | null | undefined;
+    email?: string | null | undefined;
+    image?: string | null | undefined;
   }
 }
 
-const Navbar = ({ session }: {session : UserProps}) => {
+const Navbar = ({ session }: { session: UserProps | null }) => {
   return (
     <div className="w-[90%] mx-auto flex items-center justify-between bg-white border-b py-4">
       <div className="flex items-center">
