@@ -22,5 +22,5 @@ export default async function RootLayout({
         <div className="min-h-screen w-[90%] mx-auto">{children}</div>
       </body>
     </html>
-  );
+  );   
 }
