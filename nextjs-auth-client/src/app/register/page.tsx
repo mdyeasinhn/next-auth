@@ -30,7 +30,7 @@ const RegisterPage = () => {
         alert(res.message);
         router.push("/login")
       }
-      console.log(res)
+     // console.log(res)
     } catch (err: any) {
       console.error(err.message);
       throw new Error(err.message);

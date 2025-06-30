@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { loginUser } from "@/utils/actions/loginUser";
 
-type FormValues = {
+export type FormValues = {
   email: string;
   password: string;
 };
@@ -24,19 +26,18 @@ const LoginPage = () => {
   });
 
   const onSubmit = async (data: FormValues) => {
-    const result = await signIn("credentials", {
-      redirect: false,
-      email: data.email,
-      password: data.password,
-      callbackUrl: "/dashboard",
-    });
-
-    if (result?.error) {
-      console.error(result.error);
-      // You can add toast notification here
-    } else {
-      router.push(result?.url || "/dashboard");
-    }
+    try {
+        const res = await loginUser(data);
+        if (res.accessToken) {
+          alert(res.message);
+          localStorage.setItem("accessToken", res.accessToken)
+          router.push("/")
+        }
+       // console.log(res)
+      } catch (err: any) {
+        console.error(err.message);
+        throw new Error(err.message);
+      }
   };
 
   return (
