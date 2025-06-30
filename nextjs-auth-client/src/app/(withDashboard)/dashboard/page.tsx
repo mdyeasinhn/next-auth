@@ -12,7 +12,8 @@ const DashboardPage = async () => {
           <h1 className="text-4xl text-center mt-10">Welcome {session?.user?.name}</h1>
           <h1 className="text-4xl text-center mt-10">Loged-in user email {session?.user?.email}</h1>
           <Image
-            src={session?.user?.image}
+     
+            src={session?.user?.image || "https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg"}
             width={100}
             height={100}
             alt="user image"
